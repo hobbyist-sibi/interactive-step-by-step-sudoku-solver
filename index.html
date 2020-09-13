@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Sudoku Solver</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="grid-container" id="app">
+        <div class="sudoku-grid">
+            <div class="box-container">
+                <div >
+                    <div class="all-box-wrapper" >        
+                        <div class="three-row-box">
+                            <div class="three-row">
+                                <div class="three-cell" :style="[beamBoxes[0] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                                <div class="three-cell" :style="[beamBoxes[1] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                                <div class="three-cell" :style="[beamBoxes[2] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                            </div>
+                            <div class="three-row">
+                                <div class="three-cell" :style="[beamBoxes[3] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                                <div class="three-cell" :style="[beamBoxes[4] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                                <div class="three-cell" :style="[beamBoxes[5] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                            </div>
+                            <div class="three-row">
+                                <div class="three-cell" :style="[beamBoxes[6] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                                <div class="three-cell" :style="[beamBoxes[7] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                                <div class="three-cell" :style="[beamBoxes[8] ? {'border': 'var(--box-border-highlight)'} : {'border': 'var(--box-border)'}]"></div>
+                            </div>
+                        </div>
+
+                        <div class="nine-row-box">
+                            <div class="nine-row" :style="[beamRows[0] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[1] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[2] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[3] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[4] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[5] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[6] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[7] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-row" :style="[beamRows[8] ? {'background-color': 'var(--row-highlight)'} : {'background-color': 'transparent'}]"></div>
+                        </div>
+
+                        <div class="nine-column-box">
+                            <div class="nine-column" :style="[beamColumns[0] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[1] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[2] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[3] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[4] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[5] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[6] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[7] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                            <div class="nine-column" :style="[beamColumns[8] ? {'background-color': 'var(--column-highlight)'} : {'background-color': 'transparent'}]"></div>
+                        </div>
+
+                        <div class="box">
+                            <div v-for="(row, rowIndex) in sudokuObjectArray" class="row">
+                                <div v-for="(cell, columnIndex) in row" 
+                                class="cell"
+                                v-bind:class="{ 
+                                    'normal':isCellType('normal', rowIndex, columnIndex) , 
+                                    'highlight': isCellType('highlight', rowIndex, columnIndex) ,
+                                    'yellow-highlight': isCellType('yellow-highlight', rowIndex, columnIndex) ,
+                                    'highlight-emphasise': isCellType('highlight-emphasise', rowIndex, columnIndex) ,
+                                    'suggestion': isCellType('suggestion', rowIndex, columnIndex) }">
+                                    <div v-if="isSuggestedBox(rowIndex, columnIndex)">{{suggestedNumber}}</div>
+                                    <div v-else @click="clickedCell(rowIndex, columnIndex)">{{cell.value}}</div>
+                                </div>
+                            </div>
+                        </div>    
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="answer-list-grid">
+            <div v-for="answer in answerButtons" class="answer-list">
+                <div v-if="answer.show" class="answer-list-item"
+                    @click="updateAnswer(answer)" 
+                    @mouseover="updateColorMask(answer)" 
+                    @mouseleave="resetColorMask()">
+                        <div class="number">{{answer.number}}</div> 
+                        <div>@ Row {{answer.row}}, Column {{answer.column}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+       
+    <script src="myVue.js"></script>
+</body>
+
+</html>
